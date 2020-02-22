@@ -1,0 +1,31 @@
+CMD - Search file
+=================
+1. updatedb <<< update file entreies
+2. locate [keyword] || find /etc -name [keyword]
+
+Netcat
+======
+1. nc -lvp [portNumber]
+2. nc [ip] <<< establish connection
+3. nc [ip] [port] <<< connect
+
+Share file (2 PC)
+----------
+1. nc -lvp [port] <abc.txt
+2. nc [ip] > test.txt 
+
+Remote administration
+------------------
+1. nc -lbp 4444 -e cmd.exe
+2. nc [ip] [port]
+
+Passive information gathering
+=============================
+1. Google
+site:"foundragon.com" <<< all with foundragon.com
+site:"foundragon.com" -site:"www.foundragon.com" <<< all with foundragon.com but not except www.foundragon.com
+
+Command List
+============
+1. service ssh start <<< start ssh (remote access) service
+2. netstat || nestat -antp|grep sshd <<< all services on machine

